@@ -16,5 +16,7 @@ public enum TipoProducto {
     CAMISA,
     BLUSA,
     MUSCULOSA,
-    PONCHO
+    PONCHO,
+    SACO,
+    ACCESORIO
 }
