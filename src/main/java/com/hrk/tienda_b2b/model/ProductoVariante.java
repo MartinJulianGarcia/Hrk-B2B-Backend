@@ -32,4 +32,9 @@ public class ProductoVariante {
 
     @Column(nullable = false)
     private Integer stockDisponible;
+
+    public  Double getPrecio(){return precio;};
+
+    public  Producto getProducto(){return producto;};
+
 }

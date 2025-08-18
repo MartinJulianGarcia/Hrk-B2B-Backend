@@ -23,6 +23,17 @@ public class Carrito {
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 
+    public Carrito(Long clienteId, LocalDateTime fechaCreacion) {
+        this.clienteId = clienteId;
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public List<CarritoItem> getItems(){return items; }
+
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CarritoItem> items = new ArrayList<>();
 }

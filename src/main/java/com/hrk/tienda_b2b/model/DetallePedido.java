@@ -9,6 +9,21 @@ public class DetallePedido {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public  DetallePedido(Pedido p, ProductoVariante v, Integer cant, Double pre)
+    {
+        this.pedido=p;
+        this.variante=v;
+        this.cantidad=cant;
+        this.precioUnitario=pre;
+    }
+
+//DetallePedido dp = DetallePedido.builder()
+        //    .pedido(p)
+          //  .variante(ci.getVariante())
+          //  .cantidad(ci.getCantidad())
+          //  .precioUnitario(precio) // se “congela” el precio
+          //  .build();
+
     @ManyToOne @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import jakarta.persistence.*;
 import lombok.*;
 
+import com.hrk.tienda_b2b.model.TipoProducto;
+
 
 @Entity
 @Table(name = "productos")
@@ -21,6 +23,8 @@ public class Producto {
     private Double precio;       // precio base (opcional)
     private Integer stock;       // DEPRECADO si usás variantes
     private String imagenUrl;
+
+   //public  Double getPrecio(){return precio;};
 
     @Enumerated(EnumType.STRING)
     private TipoProducto tipo;

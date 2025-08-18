@@ -74,7 +74,10 @@
 			<version>1.18.30</version> <!-- o la última estable -->
 			<scope>provided</scope>
 		</dependency>
+
 	</dependencies>
+
+
 
 
 	<build>
@@ -82,6 +85,22 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<!-- Usa UTF-8 al leer recursos -->
+					<encoding>UTF-8</encoding>
+
+					<!-- Si NO necesitas variables ${...} en application.properties,
+                         desactiva el filtrado para .properties: -->
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>properties</nonFilteredFileExtension>
+						<nonFilteredFileExtension>yml</nonFilteredFileExtension>
+						<nonFilteredFileExtension>yaml</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
