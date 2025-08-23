@@ -22,6 +22,12 @@ public class Pedido {
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
 
+    @Enumerated(EnumType.STRING)
+    private TipoDocumento tipo;   // VENTA | DEVOLUCION
+
+    // opcional: link al pedido original
+    private Long pedidoOrigenId;  // si la devolución refiere a una venta previa
+
     private Double total;
 
     // si ya tenés Usuario luego lo reemplazás; por ahora guardamos el id del cliente
