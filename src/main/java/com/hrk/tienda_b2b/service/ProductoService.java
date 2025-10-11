@@ -108,9 +108,32 @@ public class ProductoService {
                     tallesIndividuales = new String[]{talle};
                 }
                 
+                // Validar que no se mezclen talles numéricos con "U" (Único)
+                boolean tieneU = false;
+                boolean tieneNumericos = false;
+                for (String talleIndividual : tallesIndividuales) {
+                    String talleLimpio = talleIndividual.trim().toUpperCase();
+                    if (talleLimpio.equals("U") || talleLimpio.equals("TU") || talleLimpio.equals("UNICO")) {
+                        tieneU = true;
+                    } else if (talleLimpio.matches("\\d+")) {
+                        tieneNumericos = true;
+                    }
+                }
+                
+                // Si tiene tanto "U" como numéricos, es inválido
+                if (tieneU && tieneNumericos) {
+                    throw new IllegalArgumentException("No se puede mezclar talle Único (U) con talles numéricos en el mismo producto");
+                }
+                
                 // Crear una variante para cada talle individual
                 for (String talleIndividual : tallesIndividuales) {
                     String talleLimpio = talleIndividual.trim();
+                    
+                    // Normalizar "U", "TU", "UNICO" a "U"
+                    if (talleLimpio.toUpperCase().matches("U|TU|UNICO")) {
+                        talleLimpio = "U";
+                    }
+                    
                     String skuVariante = generarSku(request.getSku(), color, talleLimpio);
                     
                     ProductoVariante variante = ProductoVariante.builder()
