@@ -84,26 +84,47 @@ public class ProductoService {
         System.out.println("🔵 [SERVICE] Producto guardado con ID: " + producto.getId());
         
         // 4. Crear las variantes para cada combinación de color y talle
-        int totalVariantes = request.getColores().size() * request.getTalles().size();
+        // Calcular el total de variantes considerando talles divididos (ej: "1/2" = 2 talles)
+        int totalTalles = 0;
+        for (String talle : request.getTalles()) {
+            if (talle.contains("/")) {
+                totalTalles += talle.split("/").length;
+            } else {
+                totalTalles += 1;
+            }
+        }
+        int totalVariantes = request.getColores().size() * totalTalles;
         int stockPorVariante = request.getStock() / totalVariantes;
         
         System.out.println("🔵 [SERVICE] Creando " + totalVariantes + " variantes con stock " + stockPorVariante + " cada una");
         
         for (String color : request.getColores()) {
             for (String talle : request.getTalles()) {
-                String skuVariante = generarSku(request.getSku(), color, talle);
+                // Si el talle contiene "/", dividirlo en talles individuales
+                String[] tallesIndividuales;
+                if (talle.contains("/")) {
+                    tallesIndividuales = talle.split("/");
+                } else {
+                    tallesIndividuales = new String[]{talle};
+                }
                 
-                ProductoVariante variante = ProductoVariante.builder()
-                    .producto(producto)
-                    .sku(skuVariante)
-                    .color(color)
-                    .talle(talle)
-                    .precio(request.getPrecio())
-                    .stockDisponible(stockPorVariante)
-                    .build();
-                
-                producto.getVariantes().add(variante);
-                System.out.println("🔵 [SERVICE] Variante creada: " + skuVariante);
+                // Crear una variante para cada talle individual
+                for (String talleIndividual : tallesIndividuales) {
+                    String talleLimpio = talleIndividual.trim();
+                    String skuVariante = generarSku(request.getSku(), color, talleLimpio);
+                    
+                    ProductoVariante variante = ProductoVariante.builder()
+                        .producto(producto)
+                        .sku(skuVariante)
+                        .color(color)
+                        .talle(talleLimpio)
+                        .precio(request.getPrecio())
+                        .stockDisponible(stockPorVariante)
+                        .build();
+                    
+                    producto.getVariantes().add(variante);
+                    System.out.println("🔵 [SERVICE] Variante creada: " + skuVariante);
+                }
             }
         }
         

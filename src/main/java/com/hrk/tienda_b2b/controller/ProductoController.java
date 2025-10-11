@@ -23,14 +23,18 @@ public class ProductoController {
     private final ProductoService productoService;
 
     @GetMapping
-    public ResponseEntity<List<Producto>> listarTodos() {
+    public ResponseEntity<List<ProductoResponseDTO>> listarTodos() {
         List<Producto> productos = productoService.obtenerTodos();
-        return ResponseEntity.ok(productos);
+        List<ProductoResponseDTO> productosDTO = productos.stream()
+                .map(producto -> convertirADTO(producto))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(productosDTO);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<ProductoResponseDTO> obtenerPorId(@PathVariable Long id) {
         return productoService.obtenerPorId(id)
+                .map(producto -> convertirADTO(producto))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
