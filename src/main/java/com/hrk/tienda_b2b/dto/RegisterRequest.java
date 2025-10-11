@@ -1,7 +1,5 @@
 package com.hrk.tienda_b2b.dto;
 
-
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

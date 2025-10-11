@@ -6,7 +6,7 @@ import com.hrk.tienda_b2b.model.*;
 import com.hrk.tienda_b2b.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.hrk.tienda_b2b.config.SimplePasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,7 +18,7 @@ import java.util.Optional;
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final SimplePasswordEncoder passwordEncoder;
 
     @Override
     @Transactional

@@ -29,8 +29,9 @@ public class Producto {
     @Enumerated(EnumType.STRING)
     private TipoProducto tipo;
 
-    @ManyToOne @JoinColumn(name = "categoria_id")
-    private Categoria categoria;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Categoria categoria;  // PLANO o TEJIDO
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductoVariante> variantes = new ArrayList<>();

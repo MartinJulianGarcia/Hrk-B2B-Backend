@@ -2,6 +2,7 @@ package com.hrk.tienda_b2b.service;
 
 
 
+import com.hrk.tienda_b2b.model.Categoria;
 import com.hrk.tienda_b2b.model.Producto;
 import com.hrk.tienda_b2b.model.TipoProducto;
 import com.hrk.tienda_b2b.repository.ProductoRepository;
@@ -21,7 +22,7 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
-    public List<Producto> obtenerPorCategoria(String categoria) {
+    public List<Producto> obtenerPorCategoria(Categoria categoria) {
         return productoRepository.findByCategoria(categoria);
     }
 
