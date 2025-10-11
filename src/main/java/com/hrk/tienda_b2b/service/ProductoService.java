@@ -27,7 +27,7 @@ public class ProductoService {
         return productoRepository.findByCategoria(categoria);
     }
 
-    public List<Producto> obtenerPorTipo(TipoProducto tipo) {  // ✅ Enum como parámetro
+    public List<Producto> obtenerPorTipo(TipoProducto tipo) {
         return productoRepository.findByTipo(tipo);
     }
 
@@ -38,7 +38,7 @@ public class ProductoService {
     public Producto guardar(Producto producto) {
         // Validar que tenga imagen o asignar default
         if (producto.getImagenUrl() == null || producto.getImagenUrl().isEmpty()) {
-            producto.setImagenUrl(producto.getTipo().getImagenDefault()); // ✅ Ahora funciona
+            producto.setImagenUrl(producto.getTipo().getImagenDefault());
         }
         return productoRepository.save(producto);
     }
@@ -49,15 +49,25 @@ public class ProductoService {
 
     @Transactional
     public Producto crearProducto(CreateProductoRequest request) {
-        // 1. Crear el producto base
+        System.out.println("🔵 [SERVICE] Creando producto con request: " + request);
+        
+        // Validar que colores y talles no estén vacíos
+        if (request.getColores() == null || request.getColores().isEmpty()) {
+            throw new IllegalArgumentException("Debe proporcionar al menos un color");
+        }
+        if (request.getTalles() == null || request.getTalles().isEmpty()) {
+            throw new IllegalArgumentException("Debe proporcionar al menos un talle");
+        }
+        
+        // 1. Crear el producto base (SIN precio ni stock, esos van en las variantes)
         Producto producto = Producto.builder()
             .nombre(request.getNombre())
             .tipo(request.getTipo())
             .categoria(request.getCategoria())
             .descripcion(request.getDescripcion())
-            .precio(request.getPrecio()) // Precio base
-            .stock(request.getStock()) // Stock total
             .build();
+        
+        System.out.println("🔵 [SERVICE] Producto base creado: " + producto.getNombre());
         
         // 2. Manejar imagen: usar la proporcionada o la por defecto
         if (request.getImagenUrl() != null && !request.getImagenUrl().isEmpty()) {
@@ -66,31 +76,48 @@ public class ProductoService {
             producto.setImagenUrl(request.getTipo().getImagenDefault());
         }
         
+        System.out.println("🔵 [SERVICE] Imagen URL: " + producto.getImagenUrl());
+        
         // 3. Guardar el producto primero
-        producto = guardar(producto);
+        producto = productoRepository.save(producto);
+        
+        System.out.println("🔵 [SERVICE] Producto guardado con ID: " + producto.getId());
         
         // 4. Crear las variantes para cada combinación de color y talle
+        int totalVariantes = request.getColores().size() * request.getTalles().size();
+        int stockPorVariante = request.getStock() / totalVariantes;
+        
+        System.out.println("🔵 [SERVICE] Creando " + totalVariantes + " variantes con stock " + stockPorVariante + " cada una");
+        
         for (String color : request.getColores()) {
             for (String talle : request.getTalles()) {
+                String skuVariante = generarSku(request.getSku(), color, talle);
+                
                 ProductoVariante variante = ProductoVariante.builder()
                     .producto(producto)
-                    .sku(generarSku(request.getSku(), color, talle))
+                    .sku(skuVariante)
                     .color(color)
                     .talle(talle)
-                    .precio(request.getPrecio()) // Mismo precio para todas las variantes
-                    .stockDisponible(request.getStock() / (request.getColores().size() * request.getTalles().size())) // Distribuir stock
+                    .precio(request.getPrecio())
+                    .stockDisponible(stockPorVariante)
                     .build();
                 
                 producto.getVariantes().add(variante);
+                System.out.println("🔵 [SERVICE] Variante creada: " + skuVariante);
             }
         }
         
         // 5. Guardar el producto con las variantes
-        return guardar(producto);
+        producto = productoRepository.save(producto);
+        
+        System.out.println("✅ [SERVICE] Producto guardado con " + producto.getVariantes().size() + " variantes");
+        
+        return producto;
     }
     
     private String generarSku(String skuBase, String color, String talle) {
         // Generar SKU único para cada variante
-        return String.format("%s-%s-%s", skuBase, color.substring(0, 2).toUpperCase(), talle.toUpperCase());
+        String colorCode = color.length() >= 2 ? color.substring(0, 2).toUpperCase() : color.toUpperCase();
+        return String.format("%s-%s-%s", skuBase, colorCode, talle.toUpperCase().replaceAll("/", ""));
     }
 }

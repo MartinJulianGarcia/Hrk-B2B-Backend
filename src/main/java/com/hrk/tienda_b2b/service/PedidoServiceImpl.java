@@ -57,9 +57,8 @@ public class PedidoServiceImpl implements PedidoService {
         ProductoVariante v = varianteRepo.findById(varianteId)
                 .orElseThrow(() -> new IllegalArgumentException("Variante no encontrada"));
 
-        // precio capturado al momento
-        Double precioUnitario = (v.getPrecio() != null) ? v.getPrecio() :
-                (v.getProducto().getPrecio() != null ? v.getProducto().getPrecio() : 0.0);
+        // precio capturado al momento (ahora siempre está en la variante)
+        Double precioUnitario = v.getPrecio();
 
         DetallePedido d = DetallePedido.builder()
                 .pedido(p)

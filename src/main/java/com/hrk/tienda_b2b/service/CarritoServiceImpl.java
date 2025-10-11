@@ -54,8 +54,8 @@ public class CarritoServiceImpl implements CarritoService {
         ProductoVariante v = varianteRepo.findById(varianteId)
                 .orElseThrow(() -> new IllegalArgumentException("Variante no encontrada"));
 
-        Double precioSugerido = (v.getPrecio() != null) ? v.getPrecio()
-                : (v.getProducto().getPrecio() != null ? v.getProducto().getPrecio() : 0.0);
+        // El precio ahora siempre está en la variante
+        Double precioSugerido = v.getPrecio();
 //   public CarritoItem(Carrito c, ProductoVariante v, Integer can) {
 //        this.carrito = c;
 //        this.variante=v;
@@ -99,10 +99,10 @@ public class CarritoServiceImpl implements CarritoService {
 
         double total = 0.0;
         for (CarritoItem ci : c.getItems()) {
+            // El precio ahora siempre está en la variante
             Double precio = (ci.getPrecioUnitarioSugerido() != null)
                     ? ci.getPrecioUnitarioSugerido()
-                    : (ci.getVariante().getPrecio() != null ? ci.getVariante().getPrecio()
-                    : (ci.getVariante().getProducto().getPrecio() != null ? ci.getVariante().getProducto().getPrecio() : 0.0));
+                    : ci.getVariante().getPrecio();
 
             DetallePedido dp = new DetallePedido(p,ci.getVariante(),ci.getCantidad(),precio);
 

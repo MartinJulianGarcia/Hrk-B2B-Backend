@@ -47,9 +47,8 @@ public class DevolucionServiceImpl implements DevolucionService {
         ProductoVariante v = varianteRepo.findById(varianteId)
                 .orElseThrow(() -> new IllegalArgumentException("Variante no encontrada"));
 
-        // precio opcional (si luego harás nota de crédito)
-        Double precio = v.getPrecio() != null ? v.getPrecio()
-                : (v.getProducto().getPrecio() != null ? v.getProducto().getPrecio() : 0.0);
+        // El precio ahora siempre está en la variante
+        Double precio = v.getPrecio();
 
         DetallePedido d = DetallePedido.builder()
                 .pedido(p)

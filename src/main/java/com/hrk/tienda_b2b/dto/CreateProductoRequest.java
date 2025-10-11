@@ -19,3 +19,4 @@ public class CreateProductoRequest {
     private String descripcion;
     private String imagenUrl; // URL de la imagen subida
 }
+
