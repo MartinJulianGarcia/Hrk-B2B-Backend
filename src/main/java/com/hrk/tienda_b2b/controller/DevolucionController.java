@@ -43,6 +43,6 @@ public class DevolucionController {
     public ResponseEntity<Pedido> obtener(@PathVariable Long devId) {
         // Si querés un DTO, mapealo aquí.
 
-        return ResponseEntity.ok(/* repo o service */ devolucionService.aprobarScrap(devId)); // <-- reemplazar por find
+        return ResponseEntity.ok(/* repo o service */ devolucionService.findById(devId)); // <-- reemplazar por find
     }
 }

@@ -6,6 +6,8 @@ import lombok.*;
 import java.util.List;
 
 @Entity
+
+
 @Table(name = "categorias")
 @Getter @Setter     // esto evita tener que hacer un gettter y un setter en cada atributo
 @NoArgsConstructor @AllArgsConstructor   // genera por si solo un constructo vacio y uno con todos los campos
