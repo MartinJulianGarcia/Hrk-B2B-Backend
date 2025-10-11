@@ -10,8 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
-@Entity @Table(name = "pedidos")
+@Entity
+@Table(name = "pedidos")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Pedido {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,39 +23,44 @@ public class Pedido {
     private EstadoPedido estado;
 
     @Enumerated(EnumType.STRING)
-    private TipoDocumento tipo;   // VENTA | DEVOLUCION
+    private TipoDocumento tipo;
 
-    // opcional: link al pedido original
-    private Long pedidoOrigenId;  // si la devolución refiere a una venta previa
-
+    private Long pedidoOrigenId;
     private Double total;
 
-    // si ya tenés Usuario luego lo reemplazás; por ahora guardamos el id del cliente
+    // NUEVO: Referencia al Usuario
+    @ManyToOne @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    // MANTENER por compatibilidad
+    @Column(name = "cliente_id") // @Deprecated
     private Long clienteId;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();
 
-   public List<DetallePedido> getDetalles(){return detalles;}
-
-    public Pedido(Long cl, double tot,LocalDateTime f,EstadoPedido est)
-    {
-        this.clienteId=cl;
-        this.total=tot;
-        this.estado=est;
-        this.fecha=f;
-
+    // Constructor para compatibilidad
+    public Pedido(Long cl, double tot, LocalDateTime f, EstadoPedido est) {
+        this.clienteId = cl;
+        this.total = tot;
+        this.estado = est;
+        this.fecha = f;
     }
 
-    public void setTotal( Double total)
-    {
-       this.total=total;
+    // Constructor nuevo con Usuario
+    public Pedido(Usuario usuario, double tot, LocalDateTime f, EstadoPedido est) {
+        this.usuario = usuario;
+        this.clienteId = usuario.getId(); // Para compatibilidad
+        this.total = tot;
+        this.estado = est;
+        this.fecha = f;
     }
-    //Pedido p = Pedido.builder()
-      //      .clienteId(c.getClienteId())
-       //     .fecha(LocalDateTime.now())
-         //   .estado(EstadoPedido.DOCUMENTADO)  // o BORRADOR si querés
-          //  .total(0.0)
-          //  .build();
-     //   pedidoRepo.save(p);
+
+    public List<DetallePedido> getDetalles() {
+        return detalles;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
+    }
 }

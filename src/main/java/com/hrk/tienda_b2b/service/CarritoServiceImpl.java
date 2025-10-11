@@ -30,13 +30,20 @@ public class CarritoServiceImpl implements CarritoService {
      //   this.detalleRepo = detalleRepo;
     //}
 
+    // AGREGAR ESTA LÍNEA:
+    private final UsuarioService usuarioService; // Inyección de UsuarioService
+
     @Override
     @Transactional
     public Long crearCarrito(Long clienteId) {
-        Carrito c = new Carrito(clienteId, LocalDateTime.now());
+        // Buscar el usuario por ID usando la instancia inyectada
+        Usuario usuario = usuarioService.obtenerPorId(clienteId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        return carritoRepo.save(c).getId();
+        Carrito c = new Carrito(usuario, LocalDateTime.now());
+        return carritoRepo.save(c).getId(); // Usar tu nombre correcto del repository
     }
+
 
     @Override
     @Transactional
