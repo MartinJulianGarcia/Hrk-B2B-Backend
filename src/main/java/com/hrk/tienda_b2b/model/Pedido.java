@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+
 @Entity
 @Table(name = "pedidos")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -28,6 +29,9 @@ public class Pedido {
     private Long pedidoOrigenId;
     private Double total;
 
+    // ⭐ NUEVO: Método de pago
+    private String metodoPago;
+
     // NUEVO: Referencia al Usuario
     @ManyToOne @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
@@ -38,8 +42,6 @@ public class Pedido {
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();
-
-
 
     // Constructor para compatibilidad
     public Pedido(Long cl, double tot, LocalDateTime f, EstadoPedido est) {
@@ -58,9 +60,7 @@ public class Pedido {
         this.fecha = f;
     }
 
-    public List<DetallePedido> getDetalles() {
-        return detalles;
-    }
+
 
     public void setTotal(Double total) {
         this.total = total;

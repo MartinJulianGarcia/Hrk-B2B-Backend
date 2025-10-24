@@ -1,4 +1,3 @@
-
 package com.hrk.tienda_b2b.service;
 
 import com.hrk.tienda_b2b.model.*;
@@ -24,42 +23,29 @@ public class PedidoServiceImpl implements PedidoService {
     private final ProductoVarianteRepository varianteRepo;
     private final DetallePedidoRepository detalleRepo;
     private final MovimientoStockRepository movRepo;
-    private final UsuarioRepository usuarioRepo; // Asumiendo que existe
-
-    //public PedidoServiceImpl(PedidoRepository pedidoRepo, ProductoVarianteRepository varianteRepo, DetallePedidoRepository detalleRepo, MovimientoStockRepository movRepo) {
-    //   this.pedidoRepo = pedidoRepo;
-    //    this.varianteRepo = varianteRepo;
-    //    this.detalleRepo = detalleRepo;
-  //      this.movRepo = movRepo;
-  //  }
+    private final UsuarioRepository usuarioRepo;
 
     @Override
     @Transactional
-    public Pedido crearPedido(Long clienteId) {
+    public Pedido crearPedido(Long clienteId, String metodoPago) { // ⭐ NUEVO: Agregar método de pago
         try {
             System.out.println("🔵 [BACKEND] Creando pedido para cliente: " + clienteId);
+            System.out.println("🔵 [BACKEND] Método de pago: " + metodoPago); // ⭐ NUEVO LOG
 
-            // Verificar que el clienteId sea válido
             if (clienteId == null || clienteId <= 0) {
                 throw new IllegalArgumentException("ClienteId inválido: " + clienteId);
             }
 
-            // ⭐ BUSCAR EL USUARIO:
-            // Opción 1: Si clienteId es el mismo que usuarioId
             Usuario usuario = usuarioRepo.findById(clienteId)
                     .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + clienteId));
 
-            // Opción 2: Si necesitas buscar por otro criterio, podrías usar:
-            // Usuario usuario = usuarioRepo.findByClienteId(clienteId)
-            //     .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para cliente: " + clienteId));
-
-            // ⭐ CREAR PEDIDO CON OBJETO USUARIO:
             Pedido p = Pedido.builder()
-                    .clienteId(clienteId) // Mantener para compatibilidad
-                    .usuario(usuario)     // ⭐ Pasar el objeto Usuario completo
+                    .clienteId(clienteId)
+                    .usuario(usuario)
                     .fecha(LocalDateTime.now())
                     .estado(EstadoPedido.BORRADOR)
                     .total(0.0)
+                    .metodoPago(metodoPago) // ⭐ NUEVO: Guardar método de pago
                     .build();
 
             Pedido savedPedido = pedidoRepo.save(p);
@@ -72,6 +58,7 @@ public class PedidoServiceImpl implements PedidoService {
             throw new RuntimeException("Error interno al crear pedido: " + e.getMessage(), e);
         }
     }
+
     @Override
     public List<Pedido> obtenerPedidosPorCliente(Long clienteId) {
         return pedidoRepo.findByClienteId(clienteId);
@@ -90,7 +77,6 @@ public class PedidoServiceImpl implements PedidoService {
         ProductoVariante v = varianteRepo.findById(varianteId)
                 .orElseThrow(() -> new IllegalArgumentException("Variante no encontrada"));
 
-        // precio capturado al momento (ahora siempre está en la variante)
         Double precioUnitario = v.getPrecio();
 
         DetallePedido d = DetallePedido.builder()
@@ -103,12 +89,10 @@ public class PedidoServiceImpl implements PedidoService {
         detalleRepo.save(d);
         p.getDetalles().add(d);
 
-        // recalcular total
         p.setTotal(p.getDetalles().stream()
                 .mapToDouble(it -> it.getPrecioUnitario() * it.getCantidad())
                 .sum());
 
-        // si querés “documentar” en este momento:
         if (p.getEstado() == EstadoPedido.BORRADOR) p.setEstado(EstadoPedido.DOCUMENTADO);
 
         return p;
@@ -124,7 +108,6 @@ public class PedidoServiceImpl implements PedidoService {
             throw new IllegalStateException("El pedido no está listo para confirmar");
         }
 
-        // por cada línea: validar stock, descontar y registrar movimiento
         for (DetallePedido d : p.getDetalles()) {
             ProductoVariante v = varianteRepo.findById(d.getVariante().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Variante no encontrada"));
@@ -181,5 +164,3 @@ public class PedidoServiceImpl implements PedidoService {
         return pedidoRepo.save(p);
     }
 }
-
-

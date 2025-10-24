@@ -16,6 +16,7 @@ public class PedidoResponseDTO {
     private String fecha;
     private String estado;
     private Double total;
+    private String metodoPago; // ⭐ NUEVO: Método de pago
     private UsuarioDTO usuario;
     private List<PedidoDetalleResponseDTO> detalles;
 

@@ -6,7 +6,6 @@ import com.hrk.tienda_b2b.service.PedidoService;
 import com.hrk.tienda_b2b.model.Pedido;
 import com.hrk.tienda_b2b.model.DetallePedido;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +29,7 @@ public class PedidoController {
         try {
             System.out.println("🔵 [PEDIDO CONTROLLER] Request recibido");
             System.out.println("🔵 [PEDIDO CONTROLLER] Cliente ID: " + request.getClienteId());
+            System.out.println("🔵 [PEDIDO CONTROLLER] Método de pago: " + request.getMetodoPago()); // ⭐ NUEVO LOG
             System.out.println("🔵 [PEDIDO CONTROLLER] Usuario: " + request.getUsuario());
 
             // Validar que el cliente existe
@@ -37,8 +37,8 @@ public class PedidoController {
                 return ResponseEntity.badRequest().body(crearRespuestaError("Cliente ID es obligatorio"));
             }
 
-            // ⭐ USAR EL SERVICIO REAL EN LUGAR DE MOCK
-            Pedido pedidoCreado = pedidoService.crearPedido(request.getClienteId());
+            // ⭐ USAR EL SERVICIO REAL CON MÉTODO DE PAGO
+            Pedido pedidoCreado = pedidoService.crearPedido(request.getClienteId(), request.getMetodoPago());
 
             // Convertir a DTO
             PedidoResponseDTO responseDTO = convertirPedidoADTO(pedidoCreado, request.getUsuario());
@@ -107,13 +107,9 @@ public class PedidoController {
     }
 
     // Método helper para convertir Pedido a PedidoResponseDTO
-    // Método helper para convertir Pedido a PedidoResponseDTO
-    // Método helper para convertir Pedido a PedidoResponseDTO
-    // Método helper para convertir Pedido a PedidoResponseDTO
     private PedidoResponseDTO convertirPedidoADTO(Pedido pedido, CreatePedidoRequest.UsuarioInfoDTO usuarioInfo) {
         try {
             System.out.println("🔵 [PEDIDO CONTROLLER] Convirtiendo pedido a DTO: " + pedido.getId());
-
 
             // Convertir detalles del pedido
             List<PedidoResponseDTO.PedidoDetalleResponseDTO> detallesDTO = new ArrayList<>();
@@ -157,7 +153,8 @@ public class PedidoController {
                     .fecha(pedido.getFecha().toString())
                     .estado(pedido.getEstado().toString())
                     .total(pedido.getTotal())
-                    .detalles(detallesDTO) // ⭐ INCLUIR DETALLES REALES
+                    .metodoPago(pedido.getMetodoPago()) // ⭐ NUEVO: Incluir método de pago
+                    .detalles(detallesDTO)
                     .usuario(usuarioInfo != null ?
                             com.hrk.tienda_b2b.dto.UsuarioDTO.builder()
                                     .id(pedido.getUsuario() != null ? pedido.getUsuario().getId() : 1L)

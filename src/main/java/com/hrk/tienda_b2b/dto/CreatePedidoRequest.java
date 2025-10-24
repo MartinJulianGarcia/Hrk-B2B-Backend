@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CreatePedidoRequest {
     private Long clienteId;
+    private String metodoPago; // ⭐ NUEVO: Método de pago
     private UsuarioInfoDTO usuario;
 
     @Data
