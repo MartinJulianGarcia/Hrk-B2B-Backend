@@ -39,6 +39,8 @@ public class Pedido {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();
 
+
+
     // Constructor para compatibilidad
     public Pedido(Long cl, double tot, LocalDateTime f, EstadoPedido est) {
         this.clienteId = cl;

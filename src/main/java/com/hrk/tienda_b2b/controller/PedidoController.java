@@ -4,10 +4,14 @@ import com.hrk.tienda_b2b.dto.CreatePedidoRequest;
 import com.hrk.tienda_b2b.dto.PedidoResponseDTO;
 import com.hrk.tienda_b2b.service.PedidoService;
 import com.hrk.tienda_b2b.model.Pedido;
+import com.hrk.tienda_b2b.model.DetallePedido;
+
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -103,20 +107,80 @@ public class PedidoController {
     }
 
     // Método helper para convertir Pedido a PedidoResponseDTO
+    // Método helper para convertir Pedido a PedidoResponseDTO
+    // Método helper para convertir Pedido a PedidoResponseDTO
+    // Método helper para convertir Pedido a PedidoResponseDTO
     private PedidoResponseDTO convertirPedidoADTO(Pedido pedido, CreatePedidoRequest.UsuarioInfoDTO usuarioInfo) {
-        return PedidoResponseDTO.builder()
-                .id(pedido.getId())
-                .clienteId(pedido.getClienteId())
-                .fecha(pedido.getFecha().toString())
-                .estado(pedido.getEstado().toString())
-                .total(pedido.getTotal())
-                .usuario(usuarioInfo != null ?
-                        com.hrk.tienda_b2b.dto.UsuarioDTO.builder()
-                                .id(pedido.getUsuario().getId())
-                                .nombreRazonSocial(usuarioInfo.getNombreRazonSocial())
-                                .email(usuarioInfo.getEmail())
-                                .build() : null)
-                .build();
+        try {
+            System.out.println("🔵 [PEDIDO CONTROLLER] Convirtiendo pedido a DTO: " + pedido.getId());
+
+
+            // Convertir detalles del pedido
+            List<PedidoResponseDTO.PedidoDetalleResponseDTO> detallesDTO = new ArrayList<>();
+
+            if (pedido.getDetalles() != null && !pedido.getDetalles().isEmpty()) {
+                System.out.println("🔵 [PEDIDO CONTROLLER] Procesando " + pedido.getDetalles().size() + " detalles");
+
+                for (DetallePedido detalle : pedido.getDetalles()) {
+                    System.out.println("🔵 [PEDIDO CONTROLLER] Procesando detalle: " + detalle.getId() +
+                            " - Variante: " + detalle.getVariante().getId() +
+                            " - Cantidad: " + detalle.getCantidad());
+
+                    PedidoResponseDTO.PedidoDetalleResponseDTO detalleDTO = PedidoResponseDTO.PedidoDetalleResponseDTO.builder()
+                            .id(detalle.getId())
+                            .cantidad(detalle.getCantidad())
+                            .precioUnitario(detalle.getPrecioUnitario())
+                            .variante(PedidoResponseDTO.VarianteResponseDTO.builder()
+                                    .id(detalle.getVariante().getId())
+                                    .sku(detalle.getVariante().getSku())
+                                    .color(detalle.getVariante().getColor())
+                                    .talle(detalle.getVariante().getTalle())
+                                    .precio(detalle.getVariante().getPrecio())
+                                    .stockDisponible(detalle.getVariante().getStockDisponible())
+                                    .producto(PedidoResponseDTO.ProductoResponseDTO.builder()
+                                            .id(detalle.getVariante().getProducto().getId())
+                                            .nombre(detalle.getVariante().getProducto().getNombre())
+                                            .build())
+                                    .build())
+                            .build();
+
+                    detallesDTO.add(detalleDTO);
+                }
+            } else {
+                System.out.println("🟡 [PEDIDO CONTROLLER] Pedido sin detalles");
+            }
+
+            // Crear DTO con detalles
+            PedidoResponseDTO responseDTO = PedidoResponseDTO.builder()
+                    .id(pedido.getId())
+                    .clienteId(pedido.getClienteId())
+                    .fecha(pedido.getFecha().toString())
+                    .estado(pedido.getEstado().toString())
+                    .total(pedido.getTotal())
+                    .detalles(detallesDTO) // ⭐ INCLUIR DETALLES REALES
+                    .usuario(usuarioInfo != null ?
+                            com.hrk.tienda_b2b.dto.UsuarioDTO.builder()
+                                    .id(pedido.getUsuario() != null ? pedido.getUsuario().getId() : 1L)
+                                    .nombreRazonSocial(usuarioInfo.getNombreRazonSocial())
+                                    .email(usuarioInfo.getEmail())
+                                    .build() :
+                            // Si no hay usuarioInfo, usar la información del usuario del pedido
+                            pedido.getUsuario() != null ?
+                                    com.hrk.tienda_b2b.dto.UsuarioDTO.builder()
+                                            .id(pedido.getUsuario().getId())
+                                            .nombreRazonSocial(pedido.getUsuario().getNombreRazonSocial())
+                                            .email(pedido.getUsuario().getEmail())
+                                            .build() : null)
+                    .build();
+
+            System.out.println("🔵 [PEDIDO CONTROLLER] Pedido tiene " + (pedido.getDetalles() != null ? pedido.getDetalles().size() : 0) + " detalles");
+            return responseDTO;
+
+        } catch (Exception e) {
+            System.err.println("🔴 [PEDIDO CONTROLLER] Error al convertir pedido a DTO: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error al convertir pedido: " + e.getMessage(), e);
+        }
     }
 
     private Map<String, String> crearRespuestaError(String mensaje) {
