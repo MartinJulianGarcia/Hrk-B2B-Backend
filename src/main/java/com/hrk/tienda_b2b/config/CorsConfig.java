@@ -1,3 +1,4 @@
+
 package com.hrk.tienda_b2b.config;
 
 import org.springframework.context.annotation.Bean;
@@ -32,9 +33,10 @@ public class CorsConfig {
         // Permitir todos los métodos HTTP
         config.addAllowedMethod("*");
 
+        // ⭐ AGREGAR ESTA LÍNEA - Configurar CORS para /uploads
+        source.registerCorsConfiguration("/uploads/**", config);
         source.registerCorsConfiguration("/api/**", config);
+
         return new CorsFilter(source);
     }
 }
-
-

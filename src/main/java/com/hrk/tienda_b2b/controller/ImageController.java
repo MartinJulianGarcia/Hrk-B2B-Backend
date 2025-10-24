@@ -17,22 +17,28 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/uploads")
-@CrossOrigin(origins = "http://localhost:4200") // ⭐ AGREGAR ESTA LÍNEA
+@CrossOrigin(origins = "*")
 public class ImageController {
 
     private static final String UPLOAD_DIR = "uploads";
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
+            System.out.println("🔵 [BACKEND] ImageController - Archivo recibido: " + file.getOriginalFilename());
+            System.out.println("🔵 [BACKEND] ImageController - Tamaño: " + file.getSize() + " bytes");
+            System.out.println("🔵 [BACKEND] ImageController - Tipo: " + file.getContentType());
+
             // Validar que el archivo no esté vacío
             if (file.isEmpty()) {
+                System.out.println("🔴 [BACKEND] ImageController - Error: Archivo vacío");
                 return ResponseEntity.badRequest().body("Archivo vacío");
             }
 
             // Validar tipo de archivo
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
+                System.out.println("🔴 [BACKEND] ImageController - Error: No es una imagen");
                 return ResponseEntity.badRequest().body("Solo se permiten archivos de imagen");
             }
 
@@ -40,6 +46,7 @@ public class ImageController {
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
+                System.out.println("🔵 [BACKEND] ImageController - Directorio creado: " + uploadPath.toAbsolutePath());
             }
 
             // Generar nombre único para el archivo
@@ -54,14 +61,15 @@ public class ImageController {
             Path filePath = uploadPath.resolve(filename);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // ⭐ AÑADIR LOGS PARA DEBUG
-            System.out.println("🔵 [BACKEND] Imagen subida exitosamente: " + filename);
+            System.out.println("✅ [BACKEND] ImageController - Imagen subida exitosamente: " + filename);
+            System.out.println("✅ [BACKEND] ImageController - Ruta completa: " + filePath.toAbsolutePath());
 
             // Devolver solo el nombre del archivo
             return ResponseEntity.ok(filename);
 
         } catch (IOException e) {
-            System.out.println("🔴 [BACKEND] Error al subir imagen: " + e.getMessage());
+            System.out.println("🔴 [BACKEND] ImageController - Error al subir imagen: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Error al guardar el archivo: " + e.getMessage());
         }
     }
@@ -69,16 +77,21 @@ public class ImageController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
+            System.out.println("🔵 [BACKEND] ImageController - Solicitando imagen: " + filename);
+
             Path file = Paths.get(UPLOAD_DIR).resolve(filename).normalize();
             Resource resource = new UrlResource(file.toUri());
 
             if (resource.exists() && resource.isReadable()) {
+                System.out.println("✅ [BACKEND] ImageController - Imagen encontrada: " + file.toAbsolutePath());
                 return ResponseEntity.ok().body(resource);
             } else {
+                System.out.println("🔴 [BACKEND] ImageController - Imagen no encontrada: " + file.toAbsolutePath());
                 return ResponseEntity.notFound().build();
             }
 
         } catch (MalformedURLException e) {
+            System.out.println("🔴 [BACKEND] ImageController - Error de URL: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

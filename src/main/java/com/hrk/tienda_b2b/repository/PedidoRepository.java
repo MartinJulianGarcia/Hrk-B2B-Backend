@@ -15,4 +15,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     Optional<Pedido> findByIdAndTipo(Long id, TipoDocumento tipo);
     List<Pedido> findAllByTipoOrderByFechaDesc(TipoDocumento tipo);
     List<Pedido> findAllByClienteIdAndTipoOrderByFechaDesc(Long clienteId, TipoDocumento tipo);
+
+    List<Pedido> findByClienteId(Long clienteId);
 }

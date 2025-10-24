@@ -2,14 +2,14 @@
 package com.hrk.tienda_b2b.service;
 
 import com.hrk.tienda_b2b.model.*;
+import com.hrk.tienda_b2b.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.hrk.tienda_b2b.repository.PedidoRepository;
-import com.hrk.tienda_b2b.repository.ProductoVarianteRepository;
-import com.hrk.tienda_b2b.repository.DetallePedidoRepository;
-import com.hrk.tienda_b2b.repository.MovimientoStockRepository;
+
 import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +24,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final ProductoVarianteRepository varianteRepo;
     private final DetallePedidoRepository detalleRepo;
     private final MovimientoStockRepository movRepo;
+    private final UsuarioRepository usuarioRepo; // Asumiendo que existe
 
     //public PedidoServiceImpl(PedidoRepository pedidoRepo, ProductoVarianteRepository varianteRepo, DetallePedidoRepository detalleRepo, MovimientoStockRepository movRepo) {
     //   this.pedidoRepo = pedidoRepo;
@@ -35,13 +36,45 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional
     public Pedido crearPedido(Long clienteId) {
-        Pedido p = Pedido.builder()
-                .clienteId(clienteId)
-                .fecha(LocalDateTime.now())
-                .estado(EstadoPedido.BORRADOR)
-                .total(0.0)
-                .build();
-        return pedidoRepo.save(p);
+        try {
+            System.out.println("🔵 [BACKEND] Creando pedido para cliente: " + clienteId);
+
+            // Verificar que el clienteId sea válido
+            if (clienteId == null || clienteId <= 0) {
+                throw new IllegalArgumentException("ClienteId inválido: " + clienteId);
+            }
+
+            // ⭐ BUSCAR EL USUARIO:
+            // Opción 1: Si clienteId es el mismo que usuarioId
+            Usuario usuario = usuarioRepo.findById(clienteId)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + clienteId));
+
+            // Opción 2: Si necesitas buscar por otro criterio, podrías usar:
+            // Usuario usuario = usuarioRepo.findByClienteId(clienteId)
+            //     .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para cliente: " + clienteId));
+
+            // ⭐ CREAR PEDIDO CON OBJETO USUARIO:
+            Pedido p = Pedido.builder()
+                    .clienteId(clienteId) // Mantener para compatibilidad
+                    .usuario(usuario)     // ⭐ Pasar el objeto Usuario completo
+                    .fecha(LocalDateTime.now())
+                    .estado(EstadoPedido.BORRADOR)
+                    .total(0.0)
+                    .build();
+
+            Pedido savedPedido = pedidoRepo.save(p);
+            System.out.println("🔵 [BACKEND] Pedido creado exitosamente con ID: " + savedPedido.getId());
+
+            return savedPedido;
+        } catch (Exception e) {
+            System.err.println("🔴 [BACKEND] Error al crear pedido: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error interno al crear pedido: " + e.getMessage(), e);
+        }
+    }
+    @Override
+    public List<Pedido> obtenerPedidosPorCliente(Long clienteId) {
+        return pedidoRepo.findByClienteId(clienteId);
     }
 
     @Override

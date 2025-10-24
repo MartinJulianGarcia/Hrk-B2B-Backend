@@ -1,33 +1,32 @@
 package com.hrk.tienda_b2b.dto;
 
-import com.hrk.tienda_b2b.model.TipoUsuario;
-import com.hrk.tienda_b2b.model.Usuario;
-import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
 
-import java.time.LocalDateTime;
-
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UsuarioDTO {
     private Long id;
     private String nombreRazonSocial;
-    private String cuit;
     private String email;
-    private TipoUsuario tipoUsuario;
-    private LocalDateTime fechaCreacion;
+    private String cuit;
+    private String tipoUsuario;
+    private String fechaCreacion;
     private Boolean activo;
 
-    public static UsuarioDTO fromEntity(Usuario usuario) {
+    // Método estático para convertir desde entidad
+    public static UsuarioDTO fromEntity(com.hrk.tienda_b2b.model.Usuario usuario) {
         return UsuarioDTO.builder()
                 .id(usuario.getId())
                 .nombreRazonSocial(usuario.getNombreRazonSocial())
-                .cuit(usuario.getCuit())
                 .email(usuario.getEmail())
-                .tipoUsuario(usuario.getTipoUsuario())
-                .fechaCreacion(usuario.getFechaCreacion())
+                .cuit(usuario.getCuit())
+                .tipoUsuario(usuario.getTipoUsuario().toString())
+                .fechaCreacion(usuario.getFechaCreacion().toString())
                 .activo(usuario.getActivo())
                 .build();
     }
